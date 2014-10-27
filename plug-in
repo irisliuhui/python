@@ -1,0 +1,92 @@
+Download address:
+http://code.google.com/p/jmeter-plugins/downloads/detail?name=JMeterPlugins-0.4.2.zip
+how to install:
+http://code.google.com/p/jmeter-plugins/wiki/PluginInstall
+Note: need jre1.6 or above
+how to use:
+http://code.google.com/p/jmeter-plugins/w/list
+Help such as:
+http://code.google.com/p/jmeter-plugins/wiki/PerfMon?utm_source=jmeter&utm_medium=helplink&utm_campaign=PerfMon
+
+
+jmeterplugin.jar  to   jmeterinstaldir/lib/ext
+re-start jmeter
+JMeterPlugin 部分说明  
+2011-04-08 14:20:20|  分类： 测试|字号 订阅
+因为用Jmeter做压力测试的缘故，需要用Jmeter生成性能图表，可以Jmeter本提供的图是在是看不懂，在google的code上找到了JMeterPlugin，他可以把JMeter生成的jtl文件做出很好的统计图，同时还支持机器的cpu、memory、swap、disk io和network的监控，实在是个不错的插件。
+JMeterPluging生成的很多图都很Thread有关系，因此在使用non gui模式时一定要在jmeter.properties中修改下来参数
+jmeter.save.saveservice.thread_counts=true
+在linux下使用non gui模式的命令是：
+./jmeter.sh -n -t testplan.jmx -l result.jtl
+testplan.jmx就是测试计划文件，result.jtl就是结果文件，如果没有把thread_count这个参数打开是不会记录到线程有关的信息的：
+<httpSample t="363" lt="363" ts="1301644667897" s="true" lb="http://localhost/" rc="200" rm="OK" tn="Thread Group 1-138" dt="text" by="7888" ng="200" na="200"/>
+ng代表当前线程组中有多少活动线程
+na代表整个测试中有多少活动线程
+如果没有打开thread_count参数就不会有ng和na的值了。
+顺带在说明一下别的参数的意思：
+•	t表示从请求开始到响应结束的时间
+•	lt表示整个的空闲时间
+•	ts表示访问的时刻
+•	s表示返回的结果true表示成功，false表示失败
+•	lb表示标题
+•	rc表示返回的响应码
+•	rm表示响应信息
+•	tn表示线程的名字“1-138”表示第1个线程组的第138个线程。
+•	dt表示响应的文件类型
+•	by表示请求和响应的字节数
+ 
+由于JMeterPlugin生成的图很多，下面就每类图做一个简要的介绍：
+1  Bytes Throughput Over Time  每秒传输字节吞吐量，表明Jmeter在测试时，随着时间推移发送和接受的字节数
+ 
+ 
+ 
+ 
+2  Response Codes per Second  每秒返回的响应码，表明Jmeter测试期间，随着时间的推移返回的响应码，从中我们可看到测试期间在哪个时间段内出现了错误。就可以分析在该时间内系统的什么环境因素，导致的错误。
+ 
+ 
+ 
+3  Response Latencies Over Time 每秒钟的响应等待时间， 表明Jmeter测试期间，随着时间的推移系统的响应等待时间的变化，也是系统随着时间推移，系统效率的变化。
+ 
+ 
+4  Response Times Distribution  响应时间分布， X轴表示的是响应时间，Y轴表示的是响应次数，F(X,Y)表示系统在某种响应时间内的响应次数是多少，如果在响应时间短的地方，响应次数多，说明系统的效率比较高。
+ 
+ 
+5  Response Times Over Time 每秒钟响应时间，X轴表示的是系统运行的时刻，Y轴表示的是响应时间，F(X,Y)表示系统随着时间的推移，系统的响应时间的变化，可以看出响应时间稳定性。
+ 
+ 
+6  Response Times Percentiles 响应时间百分比，X轴表示的是百分比，Y轴表示的是响应时间，F(X,Y)表示低于某个百分比的响应时间，比如有80%的响应低于400ms。
+ 
+ 
+7  Response Times vs Threads 响应时间用户数， X轴表示的是活动线程数，也就是并发访问的用户数，Y轴表示的是响应时间，F(X,Y)表示在某种并发量的情况下，系统的响应时间是多少。
+ 
+ 
+ 
+8  Transaction Throughput Over Time   每秒处理的事务吞吐量  统计随着时间推移每秒可能的事务吞吐量 这里的事务吞吐量计算公式是： 活动线程数*1秒/一个线程的响应时间，比如当一个用户向服务器发出一个请求，在100ms后得到响应，那么事务数等于1*1000ms/100ms = 10 transcation/s，得到每秒钟可以处理是个事务数的结果。 
+ 
+ 
+9  Transaction Throughput vs Threads  每活动线程数可能的事务吞吐量，途中X轴表示的是活动线程数，Y轴表示的是事务吞吐量，F(X,Y)的含义是当系统处于某个活动线程数时，系统当时的事务吞吐量是多少。比如当有10个活动线程时，事务吞吐量是100/s，而当有20个活动线程时，事务吞吐量是50/s，说明随着用户访问的增加，系统的处理效率开始下降了。从这个图中我们可以找到一个临界点，在多大的活动线程数时，系统达到最大的吞吐量。
+ 
+ 
+10  Transactions per Second 每秒的事务数，X轴表示访问结束的时刻，Y轴表示访问量，F(X,Y)表示在某个结束时刻，一共有多少的访问量结束访问。
+ 
+ 
+ 
+11  Active Threads Over Time 每秒的活动线程数， X轴表示访问的时刻，Y轴表示活动线程数，F(X,Y)表示某个时刻的活动线程数
+ 
+
+
+
+1.1	Configure Jmeter plugin for "Server Performance Monitoring"
+ (2011-03-21 21:16:17)
+ 转载▼
+标签： 
+杂谈
+
+Here share my configuration about Jmeter plugin.
+1.Download and install the Jmeter Plugins:
+you can download JMeterPlugins-VERSION.zip in http://code.google.com/p/jmeter-plugins/downloads/detail?name=JMeterPlugins-0.4.0.zip
+then inside the JMeterPlugin.jar from JMeterPlugins-VERSION.zip in JMETER_INSTALL_DIR/lib/ext, like C:/xlz/tools/Jmeter/jakarta-jmeter-2.4/lib/ext/
+
+2.enable correct graphs display which deal with threads after reloading the JTL file by uncommenting in JMETER_INSTALL_DIR/bin/jmeter.properties the line:
+jmeter.save.saveservice.thread_counts=true
+
