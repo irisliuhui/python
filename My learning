@@ -1,0 +1,218 @@
+如何command line 启动Jmeter
+For non-interactive testing, you may choose to run JMeter without the GUI. To do so, use the following command options
+-n This specifies JMeter is to run in non-gui mode
+-t [name of JMX file that contains the Test Plan].
+-l [name of JTL file to log sample results to].
+-r Run all remote servers specified in JMeter.properties (or remote servers specified on command line by overriding properties)
+The script also lets you specify the optional firewall/proxy server information:
+-H [proxy server hostname or ip address] 
+
+-P [proxy server port]
+Example : JMeter -n -t my_test.jmx -l log.jtl -H my.proxy.server -P 8000
+
+Jmter –l  得到幫助  
+
+
+
+
+注意：要避免把JMeter安装在包含空格的目录里，因为那样会引起远程测试的一些问题。
+JMeter有有限的邮件能力，它可以以测试结果为依据来发邮件，而且支持POP/IMAP协议。它当前不支持SMTP协议，要使邮件功能支持生效，需要加入Sun公司的JavaMail包和activation包到JMeter的classpath里。
+
+
+注意：如果你在运行JMeter时遇到JVM 选项无效：-XX:NewSize=128m这样的错时，可能是由于你的系统中有多个JRE，建意你把你机器的所有JRE/JDK卸载后，重新再安装一个即可解决上面的问题。
+
+
+测试计划对象里有一个新的叫做“功能测试”的选择框，。如果选中，JMeter将会记录从每个服务器的每个样本返回的数据。如果你在监听器里选择一个文件，那么这些返回的数据会被写入这个文件。如果你在测试是否JMeter被正确配置和服务器是否返回期望的结果，这是很有用的。结果是记录返回数据的文件将会很快变的巨大，接着JMeter的性能也会降低。如果你在做压力测试，这个选项应该关闭。（它默任是关闭的）
+就是函数测试模式，开始写脚本的时候可以开着用。性能测试的时候最好关闭。
+
+
+逻辑控制器可能包话如下的子元件：取样器（请求），配置元件，其它的逻辑控制器。
+
+
+最后一个元件是HTTP Cookie管理器。你因该在所有的网站测试里添加一个Cookie管理器，否则JMeter会忽略Cookie。通过添加它到线程组这一层，我们可以确保所有的HTTP请求可以共享相同的Cookie。要添加Cookie支持，可以简单地在你的测试计划中给每个线程组添加一个HTTP Cookie管理器。这样会确保每个线程可以得到它自己的Cookie，但通过所有交互的HTTP请求对象共享。
+
+
+
+如果你想在一个线程组里添加一个以上的定时器，JMeter会在执行你所应用的那个取样器之前累加所有的计时器，然后以那累加后的时间来做停顿。
+？？
+
+
+要查看断言结果，添加断言监听器到这个线程组。
+
+
+
+如果前置处理器附有取样器元件，那么它将先于这个取样器元件执行。
+
+后置处理器多用于处理响应数据，从里面抽取出有价值的东西。当执行后置处理器时，再具体参看作用范围规则。
+
+1．	执行顺序
+
+1.	定时器 – 如果有的话
+2.	取样器
+3.	后置处理器（除非SampleResult是空）
+4.	断言（除非SampleResult是空）
+5.	监听器（除非SampleResult是空）
+
+
+
+如果JMeter检查到一个错误, 一个信息就被写道log文件中. Log文件的名字是在jmeter.properties文件中定义的. 默认值位jmeter.log, 在JMeter的开始目录中可以看到, 例如 bin目录中.
+
+
+
+存储tree的elements, 选择一个element然后右击, 选择save选项.JMeter会存储选定的element, 以及所有的子elements. 这样你就可以存储测试树的一段, 单独的element或者整个测试计划.
+
+
+一些其他的elements是有级别的. 例如, Assertion在测试树中是有级别的.如果他的父亲节点是一个request,那么它将仅仅影响该request. 如果父节点是一个controller, 那么它将影响该controller的所有后代的请求. 例如:
+ 
+
+Assertion #1仅仅应用到Request One上. 而Assertion#2应用到Request Two和Three上.
+
+
+
+
+
+
+
+
+
+
+
+远程如果不好用就关防火墙，开rmi
+
+
+
+
+15 Remote Testing远程测试
+
+在你的JMeter客户机不可用的情况下, 聪明的方法是:为模拟足够多的用户来对你的server做压力测试, 有一个控制多个的选项存在, 远程控制多个JMeter Engine从一个单独的JMeter GUI中. 远程运行JMeter, 有可以复制一个测试到多个低端的机器上从而模拟一个非常大数量的用户负载到server上. 一个JMeter的GUI客户端可以控制任何数目的远程JMeter, 搜集他们的数据. 这样提供了如下的特点:
+	真实的性能测试而不存在网络瓶颈问题.
+	快速响应的GUI
+	将测试结果存储到本地的一台机器上.
+	使用一台机器管理多个JMeter Engines.
+
+注意:
+当你想在要测试的server上运行JMeter Engine时, 你需要注意的是这样给server带来额外的处理量从而使得你的测试数据有些不准确. 近似解决的方法是在同样一个网段中有一个货多个机器作为你的配置运行JMeter Engine的server. 这样会最低限度的减少网络对测试结果的影响, 因为减少了对该server的性能的压榨.
+
+第一步: start the servers
+为使得JMeter运行在远程节点模式, 在所有你想运行JMeter的机器上运行JMeter组件. 
+运行: JMETER_HOME/bin/jmeter-server (UNIX下). 
+	 JMETER_HOME/bin/jmeter-server (Windows下)
+第二步: 添加server的IP地址到客户端的Properties文件中
+在控制机上修改/bin/jmeter.properties文件, 找到property名字为remote_hosts的行, 添加你运行JMeter的机器的IP地址, 多个地址间使用逗号分隔.
+
+注意: 你可以使用 –J的命令行参数来指定一个host来运行JMeter. 
+例如: jmeter –Jremote-hostes=host1,127.0.1,host2
+第三步: start JMeter 客户端
+现在就可以在控制JMeter的客户端上开始运行了. 在Run菜单中选择 remote start 即可.
+
+15.1 手动
+在某些情况下, jmeter-server脚本很可能无法使用. 这是使用手工方式启动JMeter的方法.
+
+JMeter使用Remote Method Invocation (RMI)作为远程传输机制. 因此, 你需要运行一个RMI Registry 程序 (rmiregistry), 它在JDK包中的bin目录中. 在运行之前, 确定下列的jar文件包含在你的系统路径中:
+	JMETER_HOME/lib/ext/ApacheJMeter_core.jar
+	JMETER_HOME/lib/jorphan.jar
+	JMETER_HOME/lib/logkit-1.2.jar
+
+rmiregistry程序需要访问特定的JMeter类. 无参数运行rmiregistry. 程序默认的监听端口为1099.
+
+一旦RMI Registry程序运行起来, 就可以运行JMeter Server了. 使用 –s选项.即, jmeter –s
+
+15.2 Tips
+
+如果你运行在Suse Linux上, 这些技巧对你很有帮助. 默认的安装会启动防火墙, 在这种情况下, 远程测试将无法正常工作. 如果你发现连接被拒绝后, 通过下列项打开debugging.
+
+解决的方法是从etc/hosts文件中删除对127.0.0.1和127.0.0.2的loopback. 当127.0.0.2的lookback无效时,jmeter-server无法连接到rmiregistry.
+
+替换:
+‘dirname $0’ /jmeter –s “$@”
+为:
+HOST=”-Djava.rmi.server.hostname=[computer_name][computer_domain] -Djava.security.policy=’dirname $0’ /[policy_file]”
+‘dirname $0’/jmeter $HOST –s “$@”
+
+同时创建一个policy文件, 添加[computer_name][computer_domain]行到/etc/hosts
+
+16 Best Practices
+16.1 Limit the number of Threads
+你的硬件能力将限制JMeter能运行的线程数. 同样也依赖于你的server速度有多快. 速度快的机器使得JMeter工作困难, 因为server很快的回复了request. JMeter工作越多, 将降低时间信息的准确度. JMeter的工作越多, 每个线程等待使用CPU的时间越长, 会越膨胀时间信息. 如果你需要一个大数值的负载测试, 要先考虑在多个机器上远程使用JMeter.
+
+16.2 何处放置Cookie Manger
+
+16.3 何处放置 Authorization Manger
+
+16.4 使用代理服务器
+使用代理服务器,最重要的事情是如何过滤你不想要的信息. 例如, 没有方法记录image的请求 (JMeter 可以被设置为下载页面上的所有图片). 这些会扰乱你的测试计划. 在大多数情况下, 都有共享的文件都有一个扩展名, 例如, .jsp, .asp, .php, .html 等等. 这些你应该在字段 ”Include Pattern”中输入”*\.jsp”来引入.
+
+同样的, 你可以在”Exclude Pattern”中输入”*.gif”将其排除在外. 依赖于你的系统,这些也许是也可能不是最好的方法. 你同样可以使用同样的方法来拒绝stylesheets, javascript等等文件.测试你的设置来验证你记录的是你想要的.
+
+代理服务器期待能够找到一个拥有Recoding Controller的Thread Group来记录HTTP请求. 这样就很方便的将你的所有samples封装到一个controller下, 并可以给定其一个名字用来描述测试用例.
+
+现在, 浏览一下一个测试用例的步骤. 如果你没有预先定义的测试用例, 使用JMeter去记录你的动作来定义你的测试用例. 一旦你完成了一系列步骤的定义, 存储整个测试用例到一个合适的命名文件中. 然后,刷新开始记录一个新的测试用例. 通过这种方式, 你可以很快的录制大量的测试用例”粗稿”.
+
+另外一个proxy server的用处是你可以抽象出一些特定的普通元素从记录的samples中. 通过定义一些user-defined variables 在测试计划级别或者在User Defined Variables Elements中, 你可以使得JMeter自动在你录取的samples中替换这些值. 例如, 你测试在一个server的程序, xxx.yyy.com, 你可以定义一个变量叫做server, 值为xxx.yyy.com, 然后在你录制的samples中的任何地方发现的该值, 都会被替换为 “${server}”.
+
+
+
+通过“Synchronizing Timer”这个定时器，可以设置多少个并发用户集合...就是集合点
+
+Some elements in the test trees are strictly hierarchical (Listeners, Config Elements, Post-Procesors, Pre-Processors, Assertions, Timers), and some are primarily ordered (controllers, samplers).
+Hierarchical: if it is sampler, hie reflect to sample and its child
+	If it is controller, hie reflect its all samplers.
+
+The Configuration elements Header Manager, Cookie Manager and Authorization manager are treated differently from the Configuration Default elements. The settings from the Configuration Default elements are merged into a set of values that the Sampler has access to. However, the settings from the Managers are not merged. If more than one Manager is in the scope of a Sampler, only one Manager is used, but there is currently no way to specify which is used.
+
+
+如果讀csv文件結果讀不到數據，只顯示 ${} 則可能是因爲csv中有多餘的空行導致的 。
+
+
+對於duplicatesession的問題，我們的解決辦法是一個用戶一個csv，然後data set config中share modle用 current thread
+
+
+
+
+在 LR 中是有一个“网页细分图”的，通过这个图，你可以比较容易的区分哪些请求的响应时间最长，如果响应时间过程，是消耗在server处理的时候，还是消耗在网络传输过程中——也就是所谓的 Server time 和 Network time。
+JMeter 并没有提供这么详细的区分——至少目前尚未发现，但是在 JMeter 的执行结果中也有一个字段可以利用一下。如果想看到这一项，首先要设置将 JMeter 运行结果保存到 XML 格式。
+
+在 JMeter.properties 中找到 
+JMeter.save.saveservice.output_format=csv   改为
+JMeter.save.saveservice.output_format=xml
+
+重新启动 JMeter ，执行一个脚本并保存测试结果。
+使用任何一个文本编辑工具打开 .jtl 文件，内容如下：
+ 1 <?xml version="1.0" encoding="UTF-8"?>
+ 2 <testResults version="1.2">
+ 3 <httpSample t="2969" lt="1906" ts="1159349557390" s="true" lb="http://jackei.cnblogs.com/" rc="200" rm="OK" tn="Thread Group 1-1" dt="text" ng="5" na="5"/>
+ 4 <httpSample t="2797" lt="1719" ts="1159349557609" s="true" lb="http://jackei.cnblogs.com/" rc="200" rm="OK" tn="Thread Group 1-2" dt="text" ng="5" na="5"/>
+ 5 <httpSample t="2625" lt="1594" ts="1159349558015" s="true" lb="http://jackei.cnblogs.com/" rc="200" rm="OK" tn="Thread Group 1-4" dt="text" ng="5" na="5"/>
+ 6 <httpSample t="2843" lt="1812" ts="1159349557812" s="true" lb="http://jackei.cnblogs.com/" rc="200" rm="OK" tn="Thread Group 1-3" dt="text" ng="5" na="5"/>
+ 7 <httpSample t="2687" lt="1110" ts="1159349558218" s="true" lb="http://jackei.cnblogs.com/" rc="200" rm="OK" tn="Thread Group 1-5" dt="text" ng="5" na="5"/>
+ 8 <httpSample t="844" lt="391" ts="1159349560374" s="true" lb="http://jackei.cnblogs.com/" rc="200" rm="OK" tn="Thread Group 1-1" dt="text" ng="5" na="5"/>
+ 9 <httpSample t="843" lt="437" ts="1159349560406" s="true" lb="http://jackei.cnblogs.com/" rc="200" rm="OK" tn="Thread Group 1-2" dt="text" ng="4" na="4"/>
+10 <httpSample t="781" lt="422" ts="1159349560640" s="true" lb="http://jackei.cnblogs.com/" rc="200" rm="OK" tn="Thread Group 1-4" dt="text" ng="3" na="3"/>
+11 <httpSample t="782" lt="391" ts="1159349560905" s="true" lb="http://jackei.cnblogs.com/" rc="200" rm="OK" tn="Thread Group 1-5" dt="text" ng="2" na="2"/>
+12 <httpSample t="1188" lt="485" ts="1159349560655" s="true" lb="http://jackei.cnblogs.com/" rc="200" rm="OK" tn="Thread Group 1-3" dt="text" ng="1" na="1"/>
+13 
+14 </testResults>
+15 
+
+找到 lt 这一项。
+
+结合 JMeter 的几篇文章和 email，解释一下 lt 的意思。
+lt ＝ latency time (ms)
+
+在 JMeter 中执行一个脚本时，大概的过程如下：
+
+
+Start timer
+Send Request
+Wait for data
+Initial (first) response packet occurs - this is latency
+more data
+...
+end of response
+Stop timer - this is the response time
+
+
+
+这里可以看到 lt 是接收到响应的第一个包的时间。
+而上面的 XML 文件中，t 这一项表示的是 elapsed time。也就是一个请求从发出到收到完整的响应的时间。
+那么 lt 就相当于 LR 中的 Server time，而 t-lt 就相当于 LR 中的 Netwrok time。
